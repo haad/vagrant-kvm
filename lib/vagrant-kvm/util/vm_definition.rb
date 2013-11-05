@@ -8,11 +8,12 @@ module VagrantPlugins
     module Util
       class VmDefinition
         # Attributes of the VM
-        attr_reader :name
-        attr_reader :cpus
+        attr_accessor :name
+        attr_accessor :cpus
         attr_accessor :disk
+        attr_accessor :memory
+        attr_accessor :arch
         attr_reader :mac
-        attr_reader :arch
         attr_reader :network
 
         def self.list_interfaces(definition)

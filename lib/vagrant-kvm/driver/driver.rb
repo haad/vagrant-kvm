@@ -29,9 +29,10 @@ module VagrantPlugins
         # XXX sufficient or have to check kvm and libvirt versions?
         attr_reader :version
 
-        def initialize(uuid=nil)
+        def initialize(uuid=nil, machine=nil)
           @logger = Log4r::Logger.new("vagrant::provider::kvm::driver")
           @uuid = uuid
+          @machine = machine
           # This should be configurable
           user=ENV['USER']||""
           @pool_name = "vagrant_#{user}"
@@ -126,8 +127,15 @@ module VagrantPlugins
           @pool.refresh
           volume = @pool.lookup_volume_by_name(new_disk)
           definition.disk = volume.path
-          # create vm
-          @logger.info("Creating new VM")
+          # Create vm
+
+          # Add custom Settings from ProviderConfig 
+          definition.memory = definition.size_in_bytes(@machine.provider_config.memory, "mb") unless @machine.provider_config.memory.nil?
+          definition.cpus = @machine.provider_config.cpu unless @machine.provider_config.cpu.nil?
+
+#          @logger.debug("#{definition.cpus} -- #{definition.memory}")
+#          @logger.debug(definition.as_libvirt)
+#          @logger.debug("!!@#! #{@machine.provider_config.memory} -- #{@machine.provider_config.cpu}")
           domain = @conn.define_domain_xml(definition.as_libvirt)
           domain.uuid
         end

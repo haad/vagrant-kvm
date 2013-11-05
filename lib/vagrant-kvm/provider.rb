@@ -5,6 +5,7 @@ module VagrantPlugins
   module ProviderKvm
     class Provider < Vagrant.plugin("2", :provider)
       attr_reader :driver
+      attr_reader :machine
 
       def initialize(machine)
         @logger  = Log4r::Logger.new("vagrant_kvm")
@@ -31,7 +32,7 @@ module VagrantPlugins
 
         begin
           @logger.debug("Instantiating the driver for machine ID: #{@machine.id.inspect}")
-          @driver = Driver::Driver.new(id)
+          @driver = Driver::Driver.new(id, @machine)
         rescue Driver::Driver::VMNotFound
           # The virtual machine doesn't exist, so we probably have a stale
           # ID. Just clear the id out of the machine and reload it.

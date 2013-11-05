@@ -4,7 +4,10 @@ module VagrantPlugins
       # An array of customizations to make on the VM prior to booting it.
       #
       # @return [Array]
-      attr_reader :customizations
+      attr_accessor :customize
+
+      attr_accessor :memory
+      attr_accessor :cpu
 
       # This should be set to the name of the VM
       #
