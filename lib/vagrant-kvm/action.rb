@@ -18,9 +18,11 @@ module VagrantPlugins
           b.use Boot
           b.use NFS
           b.use PrepareNFSSettings
-          b.use ShareFolders
           b.use SetHostname
           #b.use Customize
+
+          b.use Boot
+          b.use ShareFolders
         end
       end
 
@@ -197,6 +199,7 @@ module VagrantPlugins
 
                 # The VM is not saved, so we must have to boot it up
                 # like normal. Boot!
+                b4.use PrepareGui
                 b4.use action_boot
               end
             end
@@ -224,6 +227,9 @@ module VagrantPlugins
       def self.action_up
         Vagrant::Action::Builder.new.tap do |b|
           b.use CheckKvm
+          b.use SetName
+          b.use SetVCpus
+          b.use SetMemory
           b.use ConfigValidate
           b.use InitStoragePool
           b.use Call, Created do |env, b2|
@@ -258,9 +264,13 @@ module VagrantPlugins
       autoload :MessageNotCreated, action_root.join("message_not_created")
       autoload :MessageWillNotDestroy, action_root.join("message_will_not_destroy")
       autoload :Network, action_root.join("network")
+      autoload :PrepareGui, action_root.join("prepare_gui")
       autoload :PrepareNFSSettings, action_root.join("prepare_nfs_settings")
       autoload :PruneNFSExports, action_root.join("prune_nfs_exports")
       autoload :Resume, action_root.join("resume")
+      autoload :SetName, action_root.join("set_name")
+      autoload :SetVCpus, action_root.join("set_vcpus")
+      autoload :SetMemory, action_root.join("set_memory")
       autoload :SetupPackageFiles, action_root.join("setup_package_files")
       autoload :ShareFolders, action_root.join("share_folders")
       autoload :Suspend, action_root.join("suspend")

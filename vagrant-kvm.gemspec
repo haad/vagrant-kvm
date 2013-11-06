@@ -5,17 +5,20 @@ Gem::Specification.new do |s|
   s.name          = "vagrant-kvm"
   s.version       = VagrantPlugins::ProviderKvm::VERSION
   s.platform      = Gem::Platform::RUBY
-  s.authors       = "Alex Drahon"
+  s.authors       = ["Alex Drahon", "Hiroshi Miura"]
   s.email         = "adrahon@gmail.com"
   s.homepage      = "http://www.vagrantup.com"
   s.summary       = "Enables Vagrant to use KVM instead of VirtualBox."
   s.description   = "Enables Vagrant to use KVM instead of VirtualBox."
+  s.license       = 'MIT'
 
   s.required_rubygems_version = ">= 1.3.6"
+  s.requirements << 'KVM/QEMU, v1.2.0 or greater'
 
   s.add_runtime_dependency "nokogiri", "~> 1.5.6"
   s.add_runtime_dependency "ruby-libvirt", "~> 0.4.0"
 
+  s.add_development_dependency "pry"
   s.add_development_dependency "rake"
   s.add_development_dependency "rspec-core", "~> 2.12.2"
   s.add_development_dependency "rspec-expectations", "~> 2.12.1"

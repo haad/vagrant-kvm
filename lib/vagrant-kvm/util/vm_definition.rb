@@ -7,14 +7,23 @@ module VagrantPlugins
   module ProviderKvm
     module Util
       class VmDefinition
+
+        include Errors
+
         # Attributes of the VM
         attr_accessor :name
+<<<<<<< HEAD
         attr_accessor :cpus
+=======
+        attr_reader :cpus
+>>>>>>> master
         attr_accessor :disk
         attr_accessor :memory
         attr_accessor :arch
         attr_reader :mac
         attr_reader :network
+        attr_accessor :image_type
+        attr_accessor :qemu_bin
 
         def self.list_interfaces(definition)
           nics = {}
@@ -28,7 +37,7 @@ module VagrantPlugins
             nics[adapter][:type] = :user
           end
           # look for interfaces on virtual network
-          doc.css("devices interface[type='netwok']").each do |item|
+          doc.css("devices interface[type='network']").each do |item|
             ifcount += 1
             adapter = ifcount
             nics[adapter] ||= {}
@@ -40,6 +49,7 @@ module VagrantPlugins
 
         def initialize(definition, source_type='libvirt')
           @uuid = nil
+          @gui = nil
           @network = 'default'
           if source_type == 'ovf'
             create_from_ovf(definition)
@@ -70,7 +80,7 @@ module VagrantPlugins
           # disk volume
           diskref = doc.at_css("DiskSection Disk")["fileRef"]
           @disk = doc.at_css("References File[id='#{diskref}']")["href"]
-
+          @image_type = 'raw'
           # mac address
           # XXX we use only the first nic
           @mac = format_mac(doc.at_css("Machine Hardware Adapter[enabled='true']")['MACAddress'])
@@ -94,14 +104,28 @@ module VagrantPlugins
           @disk = doc.at_css("devices disk source")["file"]
           @mac = doc.at_css("devices interface mac")["address"]
           @network = doc.at_css("devices interface source")["network"]
+          @image_type = doc.at_css("devices disk driver")["type"]
+          @qemu_bin = doc.at_css("domain devices emulator").content
         end
 
         def as_libvirt
-          # RedHat and Debian-based systems have different executable names
-          # depending on version/architectures
-          qemu_bin = [ '/usr/bin/qemu-kvm', '/usr/bin/kvm' ]
-          qemu_bin << '/usr/bin/qemu-system-x86_64' if @arch.match(/64$/)
-          qemu_bin << '/usr/bin/qemu-system-i386'   if @arch.match(/^i.86$/)
+          if @qemu_bin
+            # user specified path of qemu binary
+            qemu_bin_list = [@qemu_bin]
+          else
+            # RedHat and Debian-based systems have different executable names
+            # depending on version/architectures
+            qemu_bin_list = [ '/usr/bin/qemu-kvm', '/usr/bin/kvm' ]
+            qemu_bin_list << '/usr/bin/qemu-system-x86_64' if @arch.match(/64$/)
+            qemu_bin_list << '/usr/bin/qemu-system-i386'   if @arch.match(/^i.86$/)
+          end
+
+          qemu_bin = qemu_bin_list.detect { |binary| File.exists? binary }
+          if not qemu_bin
+            raise Errors::KvmNoQEMUBinary,
+            :cause => @qemu_bin ?
+            "Vagrantfile (specified binary: #{@qemu_bin})" : "QEMU installation"
+          end
 
           xml = KvmTemplateRenderer.render("libvirt_domain", {
             :name => @name,
@@ -112,7 +136,9 @@ module VagrantPlugins
             :disk => @disk,
             :mac => format_mac(@mac),
             :network => @network,
-            :qemu_bin => qemu_bin.detect { |binary| File.exists? binary }
+            :gui => @gui,
+            :image_type => @image_type,
+            :qemu_bin => qemu_bin
           })
           xml
         end
@@ -123,6 +149,10 @@ module VagrantPlugins
 
         def set_mac(mac)
           @mac = format_mac(mac)
+        end
+
+        def set_gui
+          @gui = true
         end
 
         # Takes a quantity and a unit

@@ -32,7 +32,7 @@ module VagrantPlugins
 
         begin
           @logger.debug("Instantiating the driver for machine ID: #{@machine.id.inspect}")
-          @driver = Driver::Driver.new(id, @machine)
+          @driver = Driver::Driver.new(id)
         rescue Driver::Driver::VMNotFound
           # The virtual machine doesn't exist, so we probably have a stale
           # ID. Just clear the id out of the machine and reload it.
