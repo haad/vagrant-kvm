@@ -36,7 +36,6 @@ module VagrantPlugins
         def initialize(uuid=nil)
           @logger = Log4r::Logger.new("vagrant::provider::kvm::driver")
           @uuid = uuid
-          @machine = machine
           # This should be configurable
           user=ENV['USER']||""
           @pool_name = "vagrant_#{user}"
