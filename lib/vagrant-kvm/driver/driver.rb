@@ -200,6 +200,7 @@ module VagrantPlugins
 
         # Create network
         def create_network(config)
+          @logger.debug("Running create_network with #{@network_name}")
           # no need to create network using NAT
           # begin
           #    # Get the network if it exists
