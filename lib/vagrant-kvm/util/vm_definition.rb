@@ -12,16 +12,12 @@ module VagrantPlugins
 
         # Attributes of the VM
         attr_accessor :name
-<<<<<<< HEAD
         attr_accessor :cpus
-=======
-        attr_reader :cpus
->>>>>>> master
         attr_accessor :disk
         attr_accessor :memory
         attr_accessor :arch
-        attr_reader :mac
-        attr_reader :network
+        attr_accessor :mac
+        attr_accessor :network
         attr_accessor :image_type
         attr_accessor :qemu_bin
 
