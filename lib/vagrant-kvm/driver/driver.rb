@@ -313,6 +313,7 @@ module VagrantPlugins
 
         # Starts the virtual machine.
         def start
+          @logger.debug("Booting domain with uuid: #{@uuid}")
           domain = @conn.lookup_domain_by_uuid(@uuid)
           domain.create
           true

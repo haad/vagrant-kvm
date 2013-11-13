@@ -1,7 +1,7 @@
 module VagrantPlugins
   module ProviderKvm
     module Action
-      class SetVcpus
+      class SetVCpus
         def initialize(app, env)
           @logger = Log4r::Logger.new("vagrant::action::vm::setvcpu")
           @app = app
