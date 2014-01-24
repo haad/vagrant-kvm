@@ -32,6 +32,7 @@ module VagrantPlugins
         # The QEMU version
         # XXX sufficient or have to check kvm and libvirt versions?
         attr_reader :version
+        attr_reader :system_version
 
         def initialize(uuid=nil)
           @logger = Log4r::Logger.new("vagrant::provider::kvm::driver")
@@ -53,10 +54,12 @@ module VagrantPlugins
             end
           end
 
+          get_system_version
+
           @version = read_version
-          if @version < "1.2.0"
+          if @version < @system_version
             raise Errors::KvmInvalidVersion,
-              :actual => @version, :required => ">= 1.2.0"
+              :actual => @version, :required => @system_version
           end
 
           # Get storage pool if it exists
@@ -273,6 +276,15 @@ module VagrantPlugins
           min = (@conn.version - maj*1000000) / 1000
           rel = @conn.version % 1000
           "#{maj}.#{min}.#{rel}"
+        end
+
+        # Returns different package version for RedHat systems and for others(Debian)
+        def get_system_version
+          if File.exists?("/etc/redhat-release")
+            @system_version="0.1.2"
+          else
+            @system_version="1.2.0"
+          end
         end
 
         # Resumes the previously paused virtual machine.
