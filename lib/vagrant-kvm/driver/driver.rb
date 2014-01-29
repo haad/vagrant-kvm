@@ -107,7 +107,7 @@ module VagrantPlugins
         # @param [String] image_type An image type for the volume.
         # @param [String] qemu_bin A path of qemu binary.
         # @return [String] UUID of the imported VM.
-        def import(xml, path, image_type, qemu_bin)
+        def import(xml, path, image_type, qemu_bin, cpu_model)
           @logger.info("Importing VM")
           # create vm definition from xml
           definition = File.open(xml) { |f|
@@ -141,9 +141,14 @@ module VagrantPlugins
           @pool.refresh
           volume = @pool.lookup_volume_by_name(new_disk)
           definition.disk = volume.path
+          definition.memory = @memory unless @memory.nil?
+          definition.cpus = @vcpus unless @vcpus.nil?
+          definition.mac = @mac unless @mac.nil?
           definition.name = @name
+          definition.machine = get_system_machine
           definition.image_type = image_type
-          definition.qemu_bin = qemu_bin
+          definition.qemu_bin = qemu_bin unless qemu_bin.nil?
+          definition.arch = cpu_model unless cpu_model.nil?
           # create vm
           @logger.info("Creating new VM")
           domain = @conn.define_domain_xml(definition.as_libvirt)
@@ -158,7 +163,7 @@ module VagrantPlugins
         # @param [String] image_type An image type for the volume.
         # @param [String] qemu_bin A path of qemu binary.
         # @return [String] UUID of the imported VM.
-        def import_ovf(ovf, path, image_type, qemu_bin)
+        def import_ovf(ovf, path, image_type, qemu_bin, cpu_model)
           @logger.info("Importing OVF definition for VM")
           # create vm definition from ovf
           definition = File.open(ovf) { |f|
@@ -214,7 +219,8 @@ module VagrantPlugins
           definition.name = @name
           definition.machine = get_system_machine
           definition.image_type = image_type
-          definition.qemu_bin = qemu_bin
+          definition.qemu_bin = qemu_bin unless qemu_bin.nil?
+          definition.arch = cpu_model unless cpu_model.nil?
           # create vm
           @logger.info("Creating new VM")
           @logger.debug("==============================")

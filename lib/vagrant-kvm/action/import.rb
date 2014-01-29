@@ -15,6 +15,7 @@
           image_type = 'raw' unless image_type == 'qcow2'
 
           qemu_bin = env[:machine].provider_config.qemu_bin
+          cpu_model = env[:machine].provider_config.cpu_model
 
           # Import the virtual machine (ovf or libvirt)
           # if a libvirt XML definition is present we use it
@@ -23,11 +24,11 @@
           box_file = env[:machine].box.directory.join("box.xml").to_s
           if File.file?(box_file)
             env[:machine].id = env[:machine].provider.driver.import(
-                        box_file, storage_path, image_type, qemu_bin)
+                        box_file, storage_path, image_type, qemu_bin, cpu_model)
           else
             box_file = env[:machine].box.directory.join("box.ovf").to_s
             env[:machine].id = env[:machine].provider.driver.import_ovf(
-                        box_file, storage_path, image_type, qemu_bin)
+                        box_file, storage_path, image_type, qemu_bin, cpu_model)
           end
 
           # If we got interrupted, then th``e import could have been
