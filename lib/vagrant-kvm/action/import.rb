@@ -1,4 +1,4 @@
-module VagrantPlugins
+  module VagrantPlugins
   module ProviderKvm
     module Action
       class Import
@@ -30,7 +30,7 @@ module VagrantPlugins
                         box_file, storage_path, image_type, qemu_bin)
           end
 
-          # If we got interrupted, then the import could have been
+          # If we got interrupted, then th``e import could have been
           # interrupted and its not a big deal. Just return out.
           return if env[:interrupted]
 

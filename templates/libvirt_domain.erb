@@ -7,7 +7,7 @@
 <currentMemory unit='KiB'><%= memory%></currentMemory>
 <vcpu placement='static'><%= cpus %></vcpu>
   <os>
-  <type arch='<%= arch %>' machine='pc-1.2'>hvm</type>
+  <type arch='<%= arch %>' machine='<% machine %>'>hvm</type>
     <boot dev='hd'/>
   </os>
   <features>
@@ -34,9 +34,7 @@
       <address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x0'/>
     </controller>
     <interface type='network'>
-      <mac address='<%= mac %>'/>
-      <source network='vagrant'/>
-      <model type='virtio'/>
+      <source network='default'/>
     </interface>
     <serial type='pty'>
       <target port='0'/>

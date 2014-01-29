@@ -74,7 +74,6 @@ module VagrantPlugins
               </ip>
             </network>
           EOXML
-          xml = inject_hosts(xml) if @hosts.length > 0
           xml
         end
 

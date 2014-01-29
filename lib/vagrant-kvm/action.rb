@@ -15,12 +15,11 @@ module VagrantPlugins
         Vagrant::Action::Builder.new.tap do |b|
           b.use Network
           b.use Provision
-          b.use PruneNFSExports
-          b.use NFS
-          b.use PrepareNFSSettings
           b.use SetHostname
-          #b.use Customize
+          b.use Customize
           b.use Boot
+          #Disabled b.use NFS
+          #Disabled b.use PrepareNFSSettings
           b.use ShareFolders
         end
       end
@@ -68,6 +67,8 @@ module VagrantPlugins
                   b3.use ForcedHalt
                 end
               end
+
+              b.use PruneNFSExports
             else
               b2.use MessageNotCreated
             end
@@ -225,6 +226,8 @@ module VagrantPlugins
         Vagrant::Action::Builder.new.tap do |b|
           b.use CheckKvm
           b.use SetName
+          b.use SetVCpus
+          b.use SetMemory
           b.use ConfigValidate
           b.use InitStoragePool
           b.use Call, Created do |env, b2|
@@ -264,6 +267,8 @@ module VagrantPlugins
       autoload :PruneNFSExports, action_root.join("prune_nfs_exports")
       autoload :Resume, action_root.join("resume")
       autoload :SetName, action_root.join("set_name")
+      autoload :SetVCpus, action_root.join("set_vcpus")
+      autoload :SetMemory, action_root.join("set_memory")
       autoload :SetupPackageFiles, action_root.join("setup_package_files")
       autoload :ShareFolders, action_root.join("share_folders")
       autoload :Suspend, action_root.join("suspend")

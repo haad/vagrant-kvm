@@ -5,6 +5,7 @@ module VagrantPlugins
   module ProviderKvm
     class Provider < Vagrant.plugin("2", :provider)
       attr_reader :driver
+      attr_reader :machine
 
       def initialize(machine)
         @logger  = Log4r::Logger.new("vagrant_kvm")
@@ -60,13 +61,20 @@ module VagrantPlugins
       #
       # @return [String]
       def read_machine_ip
-        @machine.config.vm.networks.each do |type, options|
-          if type == :private_network && options[:ip].is_a?(String)
-            return options[:ip]
-          end
+        conn = Util::LibvirtHelper.connect
+        xml = conn.lookup_domain_by_uuid(@machine.id).xml_desc
+        xml =~ /<mac address='(.+)'\/>/
+        mac = $1
+        line = ''
+        180.times do
+          arp = `arp -n`.split("\n")
+          line = arp.detect { |l| l.include?(mac) }
+          line ? break : sleep(1)
         end
+        line =~ /(\d+\.\d+\.\d+\.\d+)/
+        Util::LibvirtHelper.disconnect(conn)
 
-        nil
+        $1
       end
 
       # Return the state of the VM

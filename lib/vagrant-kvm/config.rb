@@ -4,7 +4,15 @@ module VagrantPlugins
       # An array of customizations to make on the VM prior to booting it.
       #
       # @return [Array]
-      attr_reader :customizations
+      attr_accessor :customize
+
+      attr_accessor :memory
+      attr_accessor :cpus
+
+      # If set to `true`, then KVM/Qemu will be launched with a VNC console.
+      #
+      # @return [Boolean]
+      attr_accessor :gui
 
       # If set to `true`, then KVM/Qemu will be launched with a VNC console.
       #

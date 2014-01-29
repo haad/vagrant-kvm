@@ -12,11 +12,13 @@ module VagrantPlugins
 
         # Attributes of the VM
         attr_accessor :name
-        attr_reader :cpus
+        attr_accessor :cpus
         attr_accessor :disk
-        attr_reader :mac
-        attr_reader :arch
-        attr_reader :network
+        attr_accessor :memory
+        attr_accessor :arch
+        attr_accessor :machine
+        attr_accessor :mac
+        attr_accessor :network
         attr_accessor :image_type
         attr_accessor :qemu_bin
 
@@ -58,6 +60,7 @@ module VagrantPlugins
           # we don't need no namespace
           doc.remove_namespaces!
           @name = doc.at_css("VirtualSystemIdentifier").content
+          @name = Dir.pwd.split('/').last + '_' + doc.at_css("VirtualSystemIdentifier").content + '_' + Time.now.to_i.to_s
           devices = doc.css("VirtualHardwareSection Item")
           for device in devices
             case device.at_css("ResourceType").content
@@ -109,7 +112,11 @@ module VagrantPlugins
           else
             # RedHat and Debian-based systems have different executable names
             # depending on version/architectures
+<<<<<<< HEAD
             qemu_bin_list = [ '/usr/bin/qemu-kvm', '/usr/bin/kvm' ]
+=======
+            qemu_bin_list = [ '/usr/bin/qemu-kvm', '/usr/bin/kvm', '/usr/libexec/qemu-kvm']
+>>>>>>> parallel
             qemu_bin_list << '/usr/bin/qemu-system-x86_64' if @arch.match(/64$/)
             qemu_bin_list << '/usr/bin/qemu-system-i386'   if @arch.match(/^i.86$/)
           end
@@ -127,6 +134,7 @@ module VagrantPlugins
             :memory => size_from_bytes(@memory, "KiB"),
             :cpus => @cpus,
             :arch => @arch,
+            :machine => @machine,
             :disk => @disk,
             :mac => format_mac(@mac),
             :network => @network,

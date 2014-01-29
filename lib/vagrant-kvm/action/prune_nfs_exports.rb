@@ -8,8 +8,15 @@ module VagrantPlugins
 
         def call(env)
           if env[:host]
-            uuid = env[:machine].provider.driver.uuid
-            env[:host].nfs_prune(uuid)
+            # make sure we don't prune running vms
+            conn = Util::LibvirtHelper.connect
+            domains = conn.list_domains
+            domains = domains.map do |id|
+              conn.lookup_domain_by_id id
+            end
+            Util::LibvirtHelper.disconnect(conn)
+
+            env[:host].nfs_prune domains.map(&:uuid)
           end
 
           @app.call(env)

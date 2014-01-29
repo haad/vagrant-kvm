@@ -8,13 +8,13 @@ provider to Vagrant, allowing Vagrant to control and provision KVM/QEMU VM.
 **NOTE:** This plugin requires QEMU 1.2+, it has only been tested on Fedora 18,
 Debian Wheezy, Ubuntu 12.04(LTS) Precise and Ubuntu 13.04 Raring at the moment.
 
-**NOTE:** This plugin requires `libvirt-dev` package to be installed 
+**NOTE:** This plugin requires `libvirt-dev` package to be installed
 (as in Debian/Ubuntu) or `libvirt-devel` (Fedora/openSUSE)
 
 **NOTE** You can use a backported KVM/QEMU 1.2 with Private Package Archive(PPA)
 for Ubuntu 12.04(LTS) at https://launchpad.net/~miurahr/+archive/vagrant
 
-**NOTE** There is another plugin `vagrant-libvirt` that makes breakage for 
+**NOTE** There is another plugin `vagrant-libvirt` that makes breakage for
 `vagrant-kvm` because of a bug of `vagrant-libvirt(0.0.6)`. This will be fixed
 in `vagrant-libvirt(0.0.7 and after)`.
 
@@ -98,7 +98,7 @@ There are two box formats for the `kvm` provider:
 
 To turn this into a native box, you need to create a vagrant image and
 make it sparse.
-You need ```libguestfs-tools``` package 
+You need ```libguestfs-tools``` package
 in Debian/Ubuntu/Mint, Fedora15 and after, or CentOS/RHEL6.
 
 ```
@@ -112,7 +112,7 @@ To make box with keeping sparse, don't forget -S in tar option:
 $ tar cvSzf kvm.box ./metadata.json ./Vagrantfile ./box.xml ./box-disk1.img
 ```
 
-For CentOS/RHEL5, there is a package in EPEL5. 
+For CentOS/RHEL5, there is a package in EPEL5.
 For Gentoo, you can use ```emerge libguestfs```.
 
 You need a base MAC address and a private network like in the example.
@@ -125,3 +125,9 @@ There are some provider specific parameter to control VM definition.
 * `gui` - boolean for starting VM with VNC enabled.
 * `image_type` - an image format for vm disk: 'raw' or 'qcow2'
 
+## Push to remote repo
+
+
+```
+gem inabox -g http://192.168.1.9:8808 pkg/vagrant-kvm-0.1.4.3.gem
+```

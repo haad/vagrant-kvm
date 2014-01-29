@@ -9,6 +9,7 @@ module VagrantPlugins
 
         def call(env)
           @app.call(env)
+          @env = env
 
           using_nfs = false
           env[:machine].config.vm.synced_folders.each do |id, opts|
@@ -47,13 +48,20 @@ module VagrantPlugins
         #
         # @return [String]
         def read_machine_ip(machine)
-          machine.config.vm.networks.each do |type, options|
-            if type == :private_network && options[:ip].is_a?(String)
-              return options[:ip]
-            end
+          conn = Util::LibvirtHelper.connect
+          xml = conn.lookup_domain_by_uuid(@env[:machine].id).xml_desc
+          xml =~ /<mac address='(.+)'\/>/
+          mac = $1
+          line = ''
+          180.times do
+            arp = `arp -n`.split("\n")
+            line = arp.detect { |l| l.include?(mac) }
+            line ? break : sleep(1)
           end
+          line =~ /(\d+\.\d+\.\d+\.\d+)/
+          Util::LibvirtHelper.disconnect(conn)
 
-          nil
+          $1
         end
       end
     end
