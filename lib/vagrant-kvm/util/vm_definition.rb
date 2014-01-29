@@ -16,6 +16,7 @@ module VagrantPlugins
         attr_accessor :disk
         attr_accessor :memory
         attr_accessor :arch
+        attr_accessor :machine
         attr_accessor :mac
         attr_accessor :network
         attr_accessor :image_type
@@ -111,7 +112,7 @@ module VagrantPlugins
           else
             # RedHat and Debian-based systems have different executable names
             # depending on version/architectures
-            qemu_bin_list = [ '/usr/bin/qemu-kvm', '/usr/bin/kvm' ]
+            qemu_bin_list = [ '/usr/bin/qemu-kvm', '/usr/bin/kvm', '/usr/libexec/qemu-kvm']
             qemu_bin_list << '/usr/bin/qemu-system-x86_64' if @arch.match(/64$/)
             qemu_bin_list << '/usr/bin/qemu-system-i386'   if @arch.match(/^i.86$/)
           end
@@ -129,6 +130,7 @@ module VagrantPlugins
             :memory => size_from_bytes(@memory, "KiB"),
             :cpus => @cpus,
             :arch => @arch,
+            :machine => @machine,
             :disk => @disk,
             :mac => format_mac(@mac),
             :network => @network,

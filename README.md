@@ -125,3 +125,9 @@ There are some provider specific parameter to control VM definition.
 * `gui` - boolean for starting VM with VNC enabled.
 * `image_type` - an image format for vm disk: 'raw' or 'qcow2'
 
+## Push to remote repo
+
+```
+gem inabox -g http://192.168.1.9:8808 pkg/vagrant-kvm-0.1.4.3.gem
+```
+

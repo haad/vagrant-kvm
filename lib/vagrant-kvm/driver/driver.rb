@@ -1,5 +1,6 @@
 require 'libvirt'
 require 'log4r'
+require 'fileutils'
 
 module VagrantPlugins
   module ProviderKvm
@@ -111,21 +112,28 @@ module VagrantPlugins
           box_disk = definition.disk
           new_disk = File.basename(box_disk, File.extname(box_disk)) + "-" +
             Time.now.to_i.to_s + ".img"
-          case image_type
-          when 'qcow2'
-            @logger.info("Creating volume #{new_disk} backed by #{box_disk}")
-            old_path = File.join(File.dirname(xml), box_disk)
-            new_path = File.join(path, new_disk)
-            system("qemu-img create -f qcow2 -b #{old_path} #{new_path}")
-          when 'raw'
-            @logger.info("Copying volume #{box_disk} to #{new_disk}")
-            old_path = File.join(File.dirname(xml), box_disk)
-            new_path = File.join(path, new_disk)
-            # we use qemu-img convert to preserve image size
-            system("qemu-img convert #{old_path} -O #{image_type} #{new_path}")
+
+          if image_type == get_box_disk_format(old_path)
+              @logger.info("Disk #{old_path} is already in requested format not converting it.")
+              FileUtils.cp(old_path, tmp_path)
           else
-            @logger.info("Unknown Image type #{image_type}")
+            case image_type
+            when 'qcow2'
+              @logger.info("Creating volume #{new_disk} backed by #{box_disk}")
+              old_path = File.join(File.dirname(xml), box_disk)
+              new_path = File.join(path, new_disk)
+              system("qemu-img create -f qcow2 -b #{old_path} #{new_path}")
+            when 'raw'
+              @logger.info("Copying volume #{box_disk} to #{new_disk}")
+              old_path = File.join(File.dirname(xml), box_disk)
+              new_path = File.join(path, new_disk)
+              # we use qemu-img convert to preserve image size
+              system("qemu-img convert #{old_path} -O #{image_type} #{new_path}")
+            else
+              @logger.info("Unknown Image type #{image_type}")
+            end
           end
+
           @pool.refresh
           volume = @pool.lookup_volume_by_name(new_disk)
           definition.disk = volume.path
@@ -151,6 +159,9 @@ module VagrantPlugins
           # create vm definition from ovf
           definition = File.open(ovf) { |f|
             Util::VmDefinition.new(f.read, 'ovf') }
+          @logger.debug("-------------------------------------")
+          @logger.debug("Using VM definition\n #{definition.as_libvirt}")
+          @logger.debug("-------------------------------------")
           # create volume to storage pool
           box_disk = definition.disk
           new_disk = File.basename(box_disk, File.extname(box_disk)) + "-" +
@@ -160,28 +171,34 @@ module VagrantPlugins
           old_path = File.join(File.dirname(ovf), box_disk)
           new_path = File.join(path, new_disk)
           tmp_path = File.join(File.dirname(ovf), tmp_disk)
-          case image_type
-          when 'qcow2'
-            unless File.file?(tmp_path)
-              @logger.info("Creating native qcow2 base box image #{tmp_disk}")
-              if system("qemu-img convert -p #{old_path} -c -S 16k -O #{image_type} #{tmp_path}")
-                File.unlink(old_path)
-              else
-                raise Errors::KvmFailImageConversion
-              end
-            end
-            @logger.info("Creating volume #{new_disk} backed by #{tmp_disk}")
-            system("qemu-img create -f qcow2 -b #{tmp_path} #{new_path}")
-          when 'raw'
-            if File.file?(tmp_path)
-              @logger.info("Converting volume #{tmp_disk} to #{new_disk}")
-              system("qemu-img convert ${tmp_path} -O ${image_type} #{new_path}")
-            else
-              @logger.info("Converting volume #{old_disk} to #{new_disk}")
-              system("qemu-img convert ${old_path} -O ${image_type} #{new_path}")
-            end
+
+          if image_type == get_box_disk_format(old_path)
+              @logger.info("Disk #{old_path} is already in requested format not converting it.")
+              FileUtils.cp(old_path, new_path)
           else
-            @logger.info("Unknown Image type #{image_type}")
+            case image_type
+            when 'qcow2'
+              unless File.file?(tmp_path)
+                @logger.info("Creating native qcow2 base box image #{tmp_disk}")
+                if system("qemu-img convert -p #{old_path} -c -S 16k -O #{image_type} #{tmp_path}")
+                  File.unlink(old_path)
+                else
+                  raise Errors::KvmFailImageConversion
+                end
+              end
+              @logger.info("Creating volume #{new_disk} backed by #{tmp_disk}")
+              system("qemu-img create -f qcow2 -b #{tmp_path} #{new_path}")
+            when 'raw'
+              if File.file?(tmp_path)
+                @logger.info("Converting volume #{tmp_disk} to #{new_disk}")
+                system("qemu-img convert ${tmp_path} -O ${image_type} #{new_path}")
+              else
+                @logger.info("Converting volume #{old_path} to #{new_disk}")
+                system("qemu-img convert ${old_path} -O ${image_type} #{new_path}")
+              end
+            else
+              @logger.info("Unknown Image type #{image_type}")
+            end
           end
           @pool.refresh
           volume = @pool.lookup_volume_by_name(new_disk)
@@ -191,11 +208,16 @@ module VagrantPlugins
           # Add custom Settings from ProviderConfig
           definition.memory = @memory unless @memory.nil?
           definition.cpus = @vcpus unless @vcpus.nil?
+          definition.mac = @mac unless @mac.nil?
           definition.name = @name
+          definition.machine = get_system_machine
           definition.image_type = image_type
           definition.qemu_bin = qemu_bin
           # create vm
           @logger.info("Creating new VM")
+          @logger.debug("==============================")
+          @logger.debug("Using VM definition\n #{definition.as_libvirt}")
+          @logger.debug("==============================")
           domain = @conn.define_domain_xml(definition.as_libvirt)
           domain.uuid
         end
@@ -287,6 +309,27 @@ module VagrantPlugins
           end
         end
 
+        def get_system_machine
+          if File.exists?("/etc/redhat-release")
+            @machine="pc"
+          else
+            @machine="pc-1.2"
+          end
+        end
+
+        def get_box_disk_format(path)
+          case File.extname(path)
+            when '.qcow2'
+              original_type='qcow2'
+            when '.raw'
+              original_type='raw'
+            when '.img'
+              original_type='img'
+          end
+
+          original_type
+        end
+
         # Resumes the previously paused virtual machine.
         def resume
           @logger.debug("Resuming paused VM...")
@@ -305,6 +348,10 @@ module VagrantPlugins
 
         def set_memory(memory)
           @memory = memory
+        end
+
+        def set_mac(mac)
+          @mac = mac
         end
 
         def set_mac_address(mac)

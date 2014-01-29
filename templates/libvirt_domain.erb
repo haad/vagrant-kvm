@@ -7,7 +7,7 @@
 <currentMemory unit='KiB'><%= memory%></currentMemory>
 <vcpu placement='static'><%= cpus %></vcpu>
   <os>
-  <type arch='<%= arch %>' machine='pc-1.2'>hvm</type>
+  <type arch='<%= arch %>' machine='<% machine %>'>hvm</type>
     <boot dev='hd'/>
   </os>
   <features>

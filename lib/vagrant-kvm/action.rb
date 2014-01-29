@@ -16,12 +16,11 @@ module VagrantPlugins
           b.use Network
           b.use Provision
           b.use Boot
-          b.use NFS
-          b.use PrepareNFSSettings
+          #Disabled b.use NFS
+          #Disabled b.use PrepareNFSSettings
           b.use SetHostname
-          #b.use Customize
+          #Disabled b.use Customize
 
-          b.use Boot
           b.use ShareFolders
         end
       end
