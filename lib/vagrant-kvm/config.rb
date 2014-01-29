@@ -6,8 +6,20 @@ module VagrantPlugins
       # @return [Array]
       attr_accessor :customize
 
+      # Amount of Memory in MiBs
+      #
+      # @return [String]
       attr_accessor :memory
-      attr_accessor :cpus
+
+      # Number of CPU cores.
+      #
+      # @return [String]
+      attr_accessor :cpu
+
+      # This should be architecture of VM
+      #
+      # @return [String]
+      attr_accessor :cpu_model
 
       # If set to `true`, then KVM/Qemu will be launched with a VNC console.
       #
