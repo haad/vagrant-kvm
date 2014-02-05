@@ -55,6 +55,31 @@ module VagrantPlugins
         }
       end
 
+      require 'socket'
+      def my_first_private_ipv4
+        Socket.ip_address_list.detect{|intf| intf.ipv4_private?}
+      end
+
+      def fill_arp_table
+        addr = my_first_private_ipv4
+
+        begin
+          route =`ip route show`.split("\n")
+        rescue
+          @logger.debug("Can't get routing table addr: #{addr.ip_address}.")
+        end
+
+        line = route.detect { |r| r.include?(addr.ip_address) }
+        line =~ /^(\d+\.\d+\.\d+\.\d+\/\d+)/
+        net = $1
+
+        begin
+          `nmap -sP #{net}`.split("\n")
+        rescue
+          @logger.debug("Not filling ARP table with nmap for #{net}.")
+        end
+      end
+
       # XXX duplicated from prepare_nfs_settings
       # Returns the IP address of the guest by looking at the first
       # enabled host only network.
@@ -66,6 +91,9 @@ module VagrantPlugins
         xml =~ /<mac address='(.+)'\/>/
         mac = $1
         line = ''
+
+        fill_arp_table
+
         180.times do
           arp = `arp -n`.split("\n")
           line = arp.detect { |l| l.include?(mac) }

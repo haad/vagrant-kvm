@@ -19,6 +19,8 @@ module VagrantPlugins
         attr_accessor :machine
         attr_accessor :mac
         attr_accessor :network
+        attr_accessor :interface_type
+        attr_accessor :interface_source
         attr_accessor :image_type
         attr_accessor :qemu_bin
 
@@ -127,13 +129,14 @@ module VagrantPlugins
           xml = KvmTemplateRenderer.render("libvirt_domain", {
             :name => @name,
             :uuid => @uuid,
-            :memory => size_from_bytes(@memory, "KiB"),
+            :memory => @memory,
             :cpus => @cpus,
             :arch => @arch,
             :machine => @machine,
             :disk => @disk,
-            :mac => format_mac(@mac),
-            :network => @network,
+            :mac => @mac,
+            :interface_type => @interface_type,
+            :interface_source => @interface_source,
             :gui => @gui,
             :image_type => @image_type,
             :qemu_bin => qemu_bin

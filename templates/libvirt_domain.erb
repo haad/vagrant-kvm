@@ -33,9 +33,31 @@
     <controller type='virtio-serial' index='0'>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x0'/>
     </controller>
-    <interface type='network'>
-      <source network='default'/>
-    </interface>
+    <% if interface_type == :bridge %>
+      <interface type='<%= interface_type %>'>
+        <!-- bridge type: <%= interface_type %>, source: <%= interface_source %> -->
+        <% if mac %>
+         <mac address='<%= mac %>'/>
+        <% end %>
+        <source bridge='<%= interface_source %>'/>
+      </interface>
+    <% elsif interface_type == :network %>
+      <interface type='<%= interface_type %>'>
+         <!-- network type: <%= interface_type %>, source: <%= interface_source %> -->
+        <% if mac %>
+          <mac address='<%= mac %>'/>
+        <% end %>
+        <source network='<%= interface_source %>'/>
+      </interface>
+    <% else %>
+      <interface type='network'>
+        <!-- default network configuration type: <%= interface_type %>, source: <%= interface_source %> -->
+        <% if mac %>
+          <mac address='<%= mac %>'/>
+        <% end %>
+        <source network='default'/>
+      </interface>
+    <% end %>
     <serial type='pty'>
       <target port='0'/>
     </serial>

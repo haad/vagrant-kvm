@@ -27,9 +27,6 @@ module VagrantPlugins
         # The Name of the virtual machine we represent
         attr_reader :name
 
-        # The Name of the virtual machine we represent
-        attr_reader :name
-
         # The UUID of the virtual machine we represent
         attr_reader :uuid
 
@@ -41,6 +38,7 @@ module VagrantPlugins
         def initialize(uuid=nil)
           @logger = Log4r::Logger.new("vagrant::provider::kvm::driver")
           @uuid = uuid
+          @mac = nil
           # This should be configurable
           user=ENV['USER']||""
           @pool_name = "vagrant_#{user}"
@@ -215,12 +213,15 @@ module VagrantPlugins
           # Add custom Settings from ProviderConfig
           definition.memory = @memory unless @memory.nil?
           definition.cpus = @vcpus unless @vcpus.nil?
-          definition.mac = @mac unless @mac.nil?
+          definition.set_mac(@mac) unless @mac.nil?
           definition.name = @name
           definition.machine = get_system_machine
           definition.image_type = image_type
           definition.qemu_bin = qemu_bin unless qemu_bin.nil?
           definition.arch = cpu_model unless cpu_model.nil?
+          definition.interface_source = @interface_source unless @interface_source.nil?
+          definition.interface_type = @interface_type unless @interface_type.nil?
+          definition.set_gui if @gui
           # create vm
           @logger.info("Creating new VM")
           @logger.debug("==============================")
@@ -232,23 +233,13 @@ module VagrantPlugins
 
         # Create network
         def create_network(config)
-          @logger.debug("Running create_network with #{@network_name}")
-          # no need to create network using NAT
-          # begin
-          #    # Get the network if it exists
-          #    @network = @conn.lookup_network_by_name(@network_name)
-          #    definition = Util::NetworkDefinition.new(@network_name,
-          #                                             @network.xml_desc)
-          #    @network.destroy if @network.active?
-          #    @network.undefine
-          #  rescue Libvirt::RetrieveError
-          #    # Network doesn't exist, create with defaults
-          #    definition = Util::NetworkDefinition.new(@network_name)
-          #  end
-          #  definition.configure(config)
-          #  @network = @conn.define_network_xml(definition.as_xml)
-          #  @logger.info("Creating network #{@network_name}")
-          #  @network.create
+          @logger.debug("Running create_network with #{config[:type]} -- #{config[:source]}")
+
+          @interface_type=nil
+          @interface_source=nil
+
+          @interface_type=config[:type] if config[:type]
+          @interface_source=config[:source] if config[:source]
         end
 
         # Initialize or create storage pool
@@ -355,27 +346,20 @@ module VagrantPlugins
         end
 
         def set_memory(memory)
-          @memory = memory
-        end
-
-        def set_mac(mac)
-          @mac = mac
+           @memory = memory
         end
 
         def set_mac_address(mac)
-          domain = @conn.lookup_domain_by_uuid(@uuid)
-          definition = Util::VmDefinition.new(domain.xml_desc, 'libvirt')
-          definition.set_mac(mac)
-          domain.undefine
-          @conn.define_domain_xml(definition.as_libvirt)
+#          domain = @conn.lookup_domain_by_uuid(@uuid)
+#          definition = Util::VmDefinition.new(domain.xml_desc, 'libvirt')
+#          definition.set_mac(mac)
+#          domain.undefine
+#          @conn.define_domain_xml(definition.as_libvirt)
+            @mac = mac
         end
 
         def set_gui
-          domain = @conn.lookup_domain_by_uuid(@uuid)
-          definition = Util::VmDefinition.new(domain.xml_desc, 'libvirt')
-          definition.set_gui
-          domain.undefine
-          @conn.define_domain_xml(definition.as_libvirt)
+            @gui = true
         end
 
         # Starts the virtual machine.

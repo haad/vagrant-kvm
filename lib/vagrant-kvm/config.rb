@@ -14,17 +14,12 @@ module VagrantPlugins
       # Number of CPU cores.
       #
       # @return [String]
-      attr_accessor :cpu
+      attr_accessor :cpus
 
       # This should be architecture of VM
       #
       # @return [String]
       attr_accessor :cpu_model
-
-      # If set to `true`, then KVM/Qemu will be launched with a VNC console.
-      #
-      # @return [Boolean]
-      attr_accessor :gui
 
       # If set to `true`, then KVM/Qemu will be launched with a VNC console.
       #
@@ -56,6 +51,7 @@ module VagrantPlugins
         @gui              = UNSET_VALUE
         @image_type       = UNSET_VALUE
         @qemu_bin         = UNSET_VALUE
+        @cpu_model       = UNSET_VALUE
       end
 
       # This is the hook that is called to finalize the object before it

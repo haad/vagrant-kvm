@@ -16,7 +16,7 @@ module VagrantPlugins
           b.use Network
           b.use Provision
           b.use SetHostname
-          b.use Customize
+          #b.use Customize
           b.use Boot
           #Disabled b.use NFS
           #Disabled b.use PrepareNFSSettings
@@ -197,7 +197,6 @@ module VagrantPlugins
 
                 # The VM is not saved, so we must have to boot it up
                 # like normal. Boot!
-                b4.use PrepareGui
                 b4.use action_boot
               end
             end
@@ -228,6 +227,8 @@ module VagrantPlugins
           b.use SetName
           b.use SetVCpus
           b.use SetMemory
+          b.use PrepareGui
+          b.use Network
           b.use ConfigValidate
           b.use InitStoragePool
           b.use Call, Created do |env, b2|
