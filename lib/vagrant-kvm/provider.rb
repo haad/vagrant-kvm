@@ -71,10 +71,10 @@ module VagrantPlugins
 
         line = route.detect { |r| r.include?(addr.ip_address) }
         line =~ /^(\d+\.\d+\.\d+\.\d+\/\d+)/
-        net = $1
+        net = $1.split("/")[0]
 
         begin
-          `nmap -sP #{net}`.split("\n")
+          `nmap -sP #{net}/24`.split("\n")
         rescue
           @logger.debug("Not filling ARP table with nmap for #{net}.")
         end
@@ -91,13 +91,21 @@ module VagrantPlugins
         xml =~ /<mac address='(.+)'\/>/
         mac = $1
         line = ''
-
-        fill_arp_table
+        arp_filled=false
 
         180.times do
           arp = `arp -n`.split("\n")
           line = arp.detect { |l| l.include?(mac) }
-          line ? break : sleep(1)
+          if line
+            break
+          else
+            unless arp_filled
+              fill_arp_table
+              arp_filled = true
+            end
+            sleep(1)
+          end
+#          line ? break : sleep(1)
         end
         line =~ /(\d+\.\d+\.\d+\.\d+)/
         Util::LibvirtHelper.disconnect(conn)
