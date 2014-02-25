@@ -82,7 +82,7 @@ module VagrantPlugins
           @image_type = 'raw'
           # mac address
           # XXX we use only the first nic
-          @mac = format_mac(doc.at_css("Machine Hardware Adapter[enabled='true']")['MACAddress'])
+          #@mac = format_mac(doc.at_css("Machine Hardware Adapter[enabled='true']")['MACAddress'])
 
           # the architecture is not defined in the ovf file
           # we try to guess from OSType
