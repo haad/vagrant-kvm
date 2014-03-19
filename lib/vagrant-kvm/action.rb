@@ -227,6 +227,7 @@ module VagrantPlugins
           b.use SetName
           b.use SetVCpus
           b.use SetMemory
+          b.use SetDiskType
           b.use PrepareGui
           b.use Network
           b.use ConfigValidate

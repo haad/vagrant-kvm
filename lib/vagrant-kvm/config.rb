@@ -46,6 +46,11 @@ module VagrantPlugins
       # @return [String]
       attr_accessor :qemu_bin
 
+      # Disk controller type definition [scsi, ide, virtio, sata]
+      #
+      # @return [String]
+      attr_accessor :disk_type
+
       def initialize
         @name             = UNSET_VALUE
         @gui              = UNSET_VALUE
