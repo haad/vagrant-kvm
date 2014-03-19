@@ -24,8 +24,14 @@
     <disk type='file' device='disk'>
       <driver name='qemu' type='<%= image_type %>'/>
       <source file='<%= disk %>'/>
-      <target dev='vda' bus='<%= disk_type.to_s %>'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x06' function='0x0'/>
+      <% if disk_type == :virtio %>
+        <target dev='vda' bus='<%= disk_type.to_s %>'/>
+        <address type='pci' domain='0x0000' bus='0x00' slot='0x06' function='0x0'/>
+      <% elsif disk_type == :scsi %>
+        <target dev='sda' bus='<%= disk_type.to_s %>'/>
+      <% elsif disk_type == :ide %>
+        <target dev='hda' bus='<%= disk_type.to_s %>'/>
+      <% end %>
     </disk>
     <!-- Disk type is used to determine apropriate disk controller for our VM -->
     <% if disk_type == :ide %>
