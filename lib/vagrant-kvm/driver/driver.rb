@@ -56,7 +56,6 @@ module VagrantPlugins
             end
           end
 
-
           get_system_version
 
           @version = read_version
@@ -215,6 +214,7 @@ module VagrantPlugins
           definition.cpus = @vcpus unless @vcpus.nil?
           definition.set_mac(@mac) unless @mac.nil?
           definition.name = @name
+          definition.disk_type = @disk_type
           definition.machine = get_system_machine
           definition.image_type = image_type
           definition.qemu_bin = qemu_bin unless qemu_bin.nil?
@@ -347,6 +347,10 @@ module VagrantPlugins
 
         def set_memory(memory)
            @memory = memory
+        end
+
+        def set_disk_type(disk_type)
+          @disk_type = disk_type
         end
 
         def set_mac_address(mac)

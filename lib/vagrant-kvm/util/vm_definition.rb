@@ -14,6 +14,7 @@ module VagrantPlugins
         attr_accessor :name
         attr_accessor :cpus
         attr_accessor :disk
+        attr_accessor :disk_type
         attr_accessor :memory
         attr_accessor :arch
         attr_accessor :machine
@@ -23,6 +24,7 @@ module VagrantPlugins
         attr_accessor :interface_source
         attr_accessor :image_type
         attr_accessor :qemu_bin
+
 
         def self.list_interfaces(definition)
           nics = {}
@@ -134,6 +136,7 @@ module VagrantPlugins
             :arch => @arch,
             :machine => @machine,
             :disk => @disk,
+            :disk_type => @disk_type,
             :mac => @mac,
             :interface_type => @interface_type,
             :interface_source => @interface_source,

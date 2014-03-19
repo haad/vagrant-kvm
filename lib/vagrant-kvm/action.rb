@@ -270,6 +270,7 @@ module VagrantPlugins
       autoload :SetName, action_root.join("set_name")
       autoload :SetVCpus, action_root.join("set_vcpus")
       autoload :SetMemory, action_root.join("set_memory")
+      autoload :SetDiskType, action_root.join("set_disk_type")
       autoload :SetupPackageFiles, action_root.join("setup_package_files")
       autoload :ShareFolders, action_root.join("share_folders")
       autoload :Suspend, action_root.join("suspend")
